@@ -1,103 +1,237 @@
-import Image from "next/image";
+// サーバーコンポーネント
+// 'use client'ディレクティブを削除
 
-export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+import Script from "next/script";
+import ClientContent from "../components/ClientContent";
+import { parseStringPromise } from "xml2js";
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+// src/app/page.tsx
+export const revalidate = 3600; // 秒単位（3600秒 = 1時間）
+
+// 記事の型定義
+export type Article = {
+  title: string;
+  link: string;
+  pubDate: string;
+  thumbnail: string; // サムネイル画像のURL
+  creatorImage?: string; // 作者のアイコン画像
+  creatorName?: string; // 作者名
+};
+
+// サンプルデータ
+const sampleArticles: Article[] = [
+  {
+    title: "React備忘録 -ライフサイクル-",
+    link: "https://note.com/oyatsu_calpas04/n/nd257c811e630",
+    pubDate: "2023-04-10",
+    thumbnail:
+      "https://assets.st-note.com/production/uploads/images/183551330/rectangle_large_type_2_709dc3273a77312669a7e8df91cdfd1e.png?width=800",
+    creatorImage:
+      "https://assets.st-note.com/production/uploads/images/141253449/profile_33700660952df8114944f12254d61420.jpg?fit=bounds&format=jpeg&quality=85&width=330",
+    creatorName: "Ida",
+  },
+];
+
+// 安全な文字列変換
+function safeString(value: any): string {
+  if (typeof value === "string") return value;
+  if (value === null || value === undefined) return "";
+  return String(value);
+}
+
+// オブジェクトを安全に処理
+function safeArticle(article: any): Article {
+  return {
+    title: safeString(article.title),
+    link: safeString(article.link),
+    pubDate: safeString(article.pubDate),
+    thumbnail: safeString(article.thumbnail),
+    creatorImage: article.creatorImage ? safeString(article.creatorImage) : "",
+    creatorName: article.creatorName ? safeString(article.creatorName) : "",
+  };
+}
+
+// RSSフィードを取得
+async function fetchRssFeed(url: string): Promise<Article[]> {
+  try {
+    const response = await fetch(url, { next: { revalidate: 3600 } });
+
+    if (!response.ok) {
+      console.error(`RSS取得エラー: ${response.status}`);
+      return sampleArticles;
+    }
+
+    const xml = await response.text();
+    console.log("XML取得成功、一部:", xml.substring(0, 500));
+
+    try {
+      // XMLを解析
+      const result = await parseStringPromise(xml, {
+        explicitArray: false,
+        normalizeTags: false,
+      });
+
+      // 記事がなければサンプルを返す
+      if (!result.rss?.channel?.item) {
+        console.log("記事が見つかりませんでした");
+        return sampleArticles;
+      }
+
+      // アイテム配列を取得
+      const items = result.rss.channel.item;
+      const itemArray = Array.isArray(items) ? items : [items];
+
+      // 最初の記事の生データをログに出力
+      console.log(
+        "最初の記事の生データ:",
+        JSON.stringify(itemArray[0], null, 2)
+      );
+
+      // 記事配列を作成
+      const articles = itemArray.map((item: any) => {
+        // タイトルと日付を取得
+        const title = safeString(item.title);
+        const link = safeString(item.link);
+        const pubDate = item.pubDate
+          ? new Date(item.pubDate).toLocaleDateString("ja-JP")
+          : "";
+
+        // サムネイルの取得
+        let thumbnail = "";
+
+        // media:thumbnailの取得（属性としてURL情報がある場合）
+        if (
+          item["media:thumbnail"] &&
+          typeof item["media:thumbnail"] === "object"
+        ) {
+          if (item["media:thumbnail"].$) {
+            thumbnail = safeString(item["media:thumbnail"].$.url);
+          }
+        }
+
+        // サムネイル取得の代替手段（文字列の場合）
+        if (
+          !thumbnail &&
+          item["media:thumbnail"] &&
+          typeof item["media:thumbnail"] === "string"
+        ) {
+          thumbnail = item["media:thumbnail"];
+        }
+
+        // descriptionからの取得（最後の手段）
+        if (!thumbnail && item.description) {
+          const match = /<img.*?src=["'](.*?)["']/.exec(item.description);
+          if (match && match[1]) {
+            thumbnail = match[1];
+          }
+        }
+
+        // 作者情報
+        const creatorName = item["note:creatorName"]
+          ? safeString(item["note:creatorName"])
+          : "";
+        const creatorImage = item["note:creatorImage"]
+          ? safeString(item["note:creatorImage"])
+          : "";
+
+        const article = {
+          title,
+          link,
+          pubDate,
+          thumbnail,
+          creatorName,
+          creatorImage,
+        };
+
+        return article;
+      });
+
+      if (articles.length > 0) {
+        console.log(
+          "最初の処理済み記事:",
+          JSON.stringify(articles[0], null, 2)
+        );
+      }
+
+      return articles;
+    } catch (parseError) {
+      console.error("XML解析エラー:", parseError);
+      return sampleArticles;
+    }
+  } catch (error) {
+    console.error("RSS取得エラー:", error);
+    return sampleArticles;
+  }
+}
+
+// 直接APIからRawのXMLを取得し解析する関数
+async function directParseRssFeed(url: string): Promise<Article[]> {
+  try {
+    // 本番環境ではCORSの問題があるかもしれないので注意
+    const response = await fetch(url);
+    const xml = await response.text();
+
+    // XMLをDOM解析
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(xml, "text/xml");
+
+    // 記事アイテムを全て取得
+    const items = xmlDoc.querySelectorAll("item");
+    const articles: Article[] = [];
+
+    items.forEach((item) => {
+      // サムネイル画像を取得
+      let thumbnail = "";
+      const mediaThumbnail = item.querySelector("media\\:thumbnail");
+      if (mediaThumbnail) {
+        thumbnail = mediaThumbnail.getAttribute("url") || "";
+      }
+
+      // 作者情報を取得
+      const creatorImage =
+        item.querySelector("note\\:creatorImage")?.textContent || "";
+      const creatorName =
+        item.querySelector("note\\:creatorName")?.textContent || "";
+
+      articles.push({
+        title: item.querySelector("title")?.textContent || "",
+        link: item.querySelector("link")?.textContent || "",
+        pubDate: new Date(
+          item.querySelector("pubDate")?.textContent || ""
+        ).toLocaleDateString("ja-JP"),
+        thumbnail,
+        creatorImage,
+        creatorName,
+      });
+    });
+
+    return articles;
+  } catch (error) {
+    console.error("Direct XML parsing error:", error);
+    return [];
+  }
+}
+
+export default async function Home() {
+  try {
+    // NoteのRSSフィードを取得
+    const noteRssUrl = "https://note.com/oyatsu_calpas04/rss";
+    const articles = await fetchRssFeed(noteRssUrl);
+
+    // 記事が取得できなければサンプルデータを使用
+    const displayArticles = articles.length > 0 ? articles : sampleArticles;
+
+    return (
+      <main>
+        <ClientContent articles={displayArticles} />
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+    );
+  } catch (error) {
+    console.error("エラー:", error);
+    return (
+      <main>
+        <ClientContent articles={sampleArticles} />
+      </main>
+    );
+  }
 }
