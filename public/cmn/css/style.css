@@ -675,7 +675,6 @@ input[type="reset"] {
   font-family: "Bona Nova", serif;
 }
 
-
 /* SP */
 
 @media screen and (max-width: 768px) {
@@ -815,8 +814,7 @@ input[type="reset"] {
   }
 
   input[type="text"],
-  input[type="email"]{
+  input[type="email"] {
     width: 260px;
   }
 }
-

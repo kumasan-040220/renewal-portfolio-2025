@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Script from "next/script";
 import { Article } from "../app/page";
+import Image from "next/image";
 
 type ClientContentProps = {
   articles: Article[];
@@ -146,12 +147,30 @@ export default function ClientContent({ articles }: ClientContentProps) {
             </div>
 
             <div className="works-contents">
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+              />
             </div>
           </div>
         </div>
@@ -167,9 +186,11 @@ export default function ClientContent({ articles }: ClientContentProps) {
             <div className="profile-content">
               <div className="basic-info">
                 <div className="profile-img">
-                  <img
+                  <Image
                     src="/cmn/img/img_ico/ico_profile.jpg"
                     alt="NCG_EVERGREEN"
+                    width={100}
+                    height={100}
                   />
                 </div>
 
