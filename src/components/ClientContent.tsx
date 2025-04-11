@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef } from "react";
 import { Article } from "../app/page";
 import Image from "next/image";
-import Script from "next/script";
 
 type ClientContentProps = {
   articles: Article[];
@@ -21,7 +20,7 @@ export default function ClientContent({ articles }: ClientContentProps) {
 
   // フォーム送信処理用の関数
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // パラメータを使用
+    e.preventDefault(); // eパラメータを使用
 
     // フォームのデータを取得してformspreeに送信
     const formData = new FormData(e.currentTarget);
@@ -75,13 +74,6 @@ export default function ClientContent({ articles }: ClientContentProps) {
 
   return (
     <>
-      <Script src="/cmn/js/hamburger.js" strategy="afterInteractive" />
-      <Script src="/cmn/js/main-bg.js" strategy="afterInteractive" />
-      <Script
-        src="https://kit.fontawesome.com/ddbbf01036.js"
-        strategy="afterInteractive"
-      />
-
       <header id="header">
         <nav>
           <ul className="nav-list">
