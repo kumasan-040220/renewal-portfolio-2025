@@ -147,30 +147,12 @@ export default function ClientContent({ articles }: ClientContentProps) {
             </div>
 
             <div className="works-contents">
-              <Image
-                src="/cmn/img/img_bg/bg_comingsoon.jpg"
-                alt="coming soon"
-              />
-              <Image
-                src="/cmn/img/img_bg/bg_comingsoon.jpg"
-                alt="coming soon"
-              />
-              <Image
-                src="/cmn/img/img_bg/bg_comingsoon.jpg"
-                alt="coming soon"
-              />
-              <Image
-                src="/cmn/img/img_bg/bg_comingsoon.jpg"
-                alt="coming soon"
-              />
-              <Image
-                src="/cmn/img/img_bg/bg_comingsoon.jpg"
-                alt="coming soon"
-              />
-              <Image
-                src="/cmn/img/img_bg/bg_comingsoon.jpg"
-                alt="coming soon"
-              />
+              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
+              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
+              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
+              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
+              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
+              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
             </div>
           </div>
         </div>
@@ -187,10 +169,10 @@ export default function ClientContent({ articles }: ClientContentProps) {
               <div className="basic-info">
                 <div className="profile-img">
                   <Image
-                    src="/cmn/img/img_ico/ico_profile.jpg"
+                    src="/cmn/img/img_ico/ico_profile.png"
                     alt="NCG_EVERGREEN"
-                    width={100}
-                    height={100}
+                    width={200}
+                    height={200}
                   />
                 </div>
 
