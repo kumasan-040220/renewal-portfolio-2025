@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import Script from "next/script";
 import { Article } from "../app/page";
 import Image from "next/image";
+import Script from "next/script";
 
 type ClientContentProps = {
   articles: Article[];
@@ -21,17 +21,26 @@ export default function ClientContent({ articles }: ClientContentProps) {
 
   // フォーム送信処理用の関数
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    // フォームのデフォルト送信処理を実行（formspree.ioへのデータ送信）
-    // この段階では送信処理はキャンセルせず通常通り行われる
+    e.preventDefault(); // パラメータを使用
 
-    // 非同期で少し遅らせてモーダルを閉じる（データ送信完了を待つため）
-    setTimeout(() => {
-      if (formRef.current) {
-        formRef.current.reset(); // フォームをリセット
-      }
-      closeModal();
-      console.log("フォーム送信完了、モーダル閉じました");
-    }, 1000);
+    // フォームのデータを取得してformspreeに送信
+    const formData = new FormData(e.currentTarget);
+    fetch("https://formspree.io/f/manepoda", {
+      method: "POST",
+      body: formData,
+      headers: {
+        Accept: "application/json",
+      },
+    }).then(() => {
+      // 送信後の処理
+      setTimeout(() => {
+        if (formRef.current) {
+          formRef.current.reset();
+        }
+        closeModal();
+        console.log("フォーム送信完了、モーダル閉じました");
+      }, 1000);
+    });
   };
 
   const handleImageError = (index: number) => {
@@ -120,11 +129,13 @@ export default function ClientContent({ articles }: ClientContentProps) {
                     rel="noopener noreferrer"
                   >
                     {article.thumbnail && !imageErrors[index] && (
-                      <img
+                      <Image
                         src={article.thumbnail}
                         alt={article.title}
                         onError={() => handleImageError(index)}
-                        width="300"
+                        width={300}
+                        height={200}
+                        style={{ objectFit: "cover" }}
                       />
                     )}
                   </a>
@@ -147,12 +158,48 @@ export default function ClientContent({ articles }: ClientContentProps) {
             </div>
 
             <div className="works-contents">
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
-              <img src="/cmn/img/img_bg/bg_comingsoon.jpg" alt="coming soon" />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+                width={280}
+                height={200}
+                style={{ objectFit: "contain" }}
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+                width={280}
+                height={200}
+                style={{ objectFit: "contain" }}
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+                width={280}
+                height={200}
+                style={{ objectFit: "contain" }}
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+                width={280}
+                height={200}
+                style={{ objectFit: "contain" }}
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+                width={280}
+                height={200}
+                style={{ objectFit: "contain" }}
+              />
+              <Image
+                src="/cmn/img/img_bg/bg_comingsoon.jpg"
+                alt="coming soon"
+                width={280}
+                height={200}
+                style={{ objectFit: "contain" }}
+              />
             </div>
           </div>
         </div>
